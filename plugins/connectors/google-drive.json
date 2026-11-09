@@ -1,0 +1,171 @@
+{
+  "id": "google-drive",
+  "name": "Google Drive",
+  "category": "Файлы",
+  "icon": "gdrive",
+  "color": "#e8f5e9",
+  "description": "Поиск, чтение и создание файлов и папок на Google Диске.",
+  "docsUrl": "https://developers.google.com/drive/api/reference/rest/v3",
+  "auth": {
+    "type": "oauth2",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "tokenLabel": "OAuth Access Token",
+    "tokenHint": "Нужен свой OAuth client (Desktop app) в Google Cloud Console. Включи Google Drive API.",
+    "validate": {
+      "method": "GET",
+      "url": "https://www.googleapis.com/oauth2/v2/userinfo",
+      "labelPath": "email"
+    },
+    "oauth": {
+      "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+      "tokenUrl": "https://oauth2.googleapis.com/token",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile"
+      ],
+      "needsClientSecret": true,
+      "pkce": true,
+      "clientIdLabel": "OAuth Client ID",
+      "clientSecretLabel": "OAuth Client Secret",
+      "clientHelpUrl": "https://console.cloud.google.com/apis/credentials",
+      "extraAuthParams": {
+        "access_type": "offline",
+        "prompt": "consent"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "gdrive_search_files",
+      "description": "Search Drive files with a Drive query, e.g. \"name contains 'report' and mimeType = 'application/pdf'\".",
+      "method": "GET",
+      "url": "https://www.googleapis.com/drive/v3/files",
+      "query": {
+        "q": "{query}",
+        "pageSize": 30,
+        "orderBy": "modifiedTime desc",
+        "fields": "files(id,name,mimeType,modifiedTime,webViewLink,size,owners(displayName))"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Drive search query. Use \"trashed = false\" to exclude deleted files."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "gdrive_list_recent",
+      "description": "List recently modified files in Drive.",
+      "method": "GET",
+      "url": "https://www.googleapis.com/drive/v3/files",
+      "query": {
+        "pageSize": 30,
+        "orderBy": "modifiedTime desc",
+        "q": "trashed = false",
+        "fields": "files(id,name,mimeType,modifiedTime,webViewLink,size)"
+      },
+      "args": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "gdrive_get_file",
+      "description": "Get metadata of a file by id.",
+      "method": "GET",
+      "url": "https://www.googleapis.com/drive/v3/files/{file_id}",
+      "query": {
+        "fields": "id,name,mimeType,size,modifiedTime,webViewLink,description,parents,owners(displayName,emailAddress)"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      }
+    },
+    {
+      "name": "gdrive_read_text_file",
+      "description": "Download a text-based file from Drive (Google Docs are exported as plain text).",
+      "method": "GET",
+      "url": "https://www.googleapis.com/drive/v3/files/{file_id}/export",
+      "query": {
+        "mimeType": "text/plain"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "Google Docs/Sheets/Slides file id"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      }
+    },
+    {
+      "name": "gdrive_download_file",
+      "description": "Download a regular (non-Google) file's content as text (only for text files).",
+      "method": "GET",
+      "url": "https://www.googleapis.com/drive/v3/files/{file_id}",
+      "query": {
+        "alt": "media"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ]
+      }
+    },
+    {
+      "name": "gdrive_create_folder",
+      "description": "Create a folder in Drive (optionally inside another folder).",
+      "method": "POST",
+      "url": "https://www.googleapis.com/drive/v3/files",
+      "body": {
+        "name": "{name}",
+        "mimeType": "application/vnd.google-apps.folder",
+        "parents": "{{json:parents}}"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional parent folder ids"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  ]
+}

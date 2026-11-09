@@ -1,0 +1,87 @@
+{
+  "id": "gmail",
+  "name": "Gmail",
+  "category": "Почта",
+  "icon": "gmail",
+  "color": "#fdecec",
+  "description": "Поиск писем, чтение переписки и отправка писем.",
+  "docsUrl": "https://developers.google.com/gmail/api/reference/rest",
+  "auth": {
+    "type": "oauth2",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "tokenLabel": "OAuth Access Token",
+    "tokenHint": "Нужен свой OAuth client (Desktop app) в Google Cloud Console. Включи Gmail API.",
+    "validate": { "method": "GET", "url": "https://gmail.googleapis.com/gmail/v1/users/me/profile", "labelPath": "emailAddress" },
+    "oauth": {
+      "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+      "tokenUrl": "https://oauth2.googleapis.com/token",
+      "scopes": [
+        "https://www.googleapis.com/auth/gmail.modify",
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/userinfo.email"
+      ],
+      "needsClientSecret": true,
+      "pkce": true,
+      "clientIdLabel": "OAuth Client ID",
+      "clientSecretLabel": "OAuth Client Secret",
+      "clientHelpUrl": "https://console.cloud.google.com/apis/credentials",
+      "extraAuthParams": { "access_type": "offline", "prompt": "consent" }
+    }
+  },
+  "tools": [
+    {
+      "name": "gmail_search_messages",
+      "description": "Search Gmail messages using Gmail query syntax, e.g. 'from:boss@company.com newer_than:7d'.",
+      "method": "GET",
+      "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+      "query": { "q": "{query}", "maxResults": 20 },
+      "args": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "gmail_get_message",
+      "description": "Get a Gmail message (headers and plain text body).",
+      "method": "GET",
+      "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}",
+      "query": { "format": "full" },
+      "args": {
+        "type": "object",
+        "properties": { "message_id": { "type": "string" } },
+        "required": ["message_id"]
+      }
+    },
+    {
+      "name": "gmail_get_thread",
+      "description": "Get a Gmail thread with all messages.",
+      "method": "GET",
+      "url": "https://gmail.googleapis.com/gmail/v1/users/me/threads/{thread_id}",
+      "query": { "format": "full" },
+      "args": {
+        "type": "object",
+        "properties": { "thread_id": { "type": "string" } },
+        "required": ["thread_id"]
+      }
+    },
+    {
+      "name": "gmail_send_email",
+      "description": "Send an email. Args: to, subject, body, optional cc.",
+      "method": "POST",
+      "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+      "compose": "rfc822",
+      "args": {
+        "type": "object",
+        "properties": {
+          "to": { "type": "string", "description": "Recipient(s), comma separated" },
+          "subject": { "type": "string" },
+          "body": { "type": "string", "description": "Plain text body" },
+          "cc": { "type": "string", "description": "Optional CC" }
+        },
+        "required": ["to", "subject", "body"]
+      }
+    }
+  ]
+}

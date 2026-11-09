@@ -1,0 +1,110 @@
+{
+  "name": "comrade-harness",
+  "version": "2.0.0",
+  "description": "Comrade Harness - Small Harness for Small Models",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron test/smoke.js",
+    "probe": "electron test/probe.js",
+    "build:mac": "electron-builder --mac --arm64",
+    "build:win": "electron-builder --win zip --x64",
+    "build:win:installer": "electron-builder --win nsis --x64",
+    "build:all": "npm run build:mac && npm run build:win"
+  },
+  "author": "Comrade",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.comrade.harness",
+    "productName": "Comrade Harness",
+    "copyright": "Comrade",
+    "asar": true,
+    "npmRebuild": false,
+    "buildDependenciesFromSource": false,
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "style.css",
+      "lib/**/*",
+      "plugins/**/*",
+      "vendor/**/*",
+      "assets/**/*",
+      "!**/*.map",
+      "!**/.DS_Store"
+    ],
+    "afterPack": "scripts/after-pack.js",
+    "asarUnpack": [
+      "plugins/mcp/**"
+    ],
+    "mac": {
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "darkModeSupport": true,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "Comrade Harness ${version}",
+      "iconSize": 120,
+      "contents": [
+        {
+          "x": 140,
+          "y": 200,
+          "type": "file"
+        },
+        {
+          "x": 400,
+          "y": 200,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Comrade Harness",
+      "artifactName": "Comrade-Harness-Setup-${version}-x64.${ext}"
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  }
+}

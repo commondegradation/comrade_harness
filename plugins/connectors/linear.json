@@ -1,0 +1,116 @@
+{
+  "id": "linear",
+  "name": "Linear",
+  "category": "Задачи",
+  "icon": "linear",
+  "color": "#eef0ff",
+  "description": "Issues, команды и проекты Linear через GraphQL API.",
+  "docsUrl": "https://developers.linear.app/docs",
+  "auth": {
+    "type": "token",
+    "header": "Authorization",
+    "prefix": "",
+    "tokenLabel": "Personal API Key",
+    "tokenPlaceholder": "lin_api_…",
+    "tokenHint": "Settings → API → Personal API keys. Ключ передаётся без префикса Bearer.",
+    "helpUrl": "https://linear.app/settings/api",
+    "validate": {
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": { "query": "{ viewer { name email } }" },
+      "labelPath": "data.viewer.name"
+    }
+  },
+  "headers": { "Content-Type": "application/json" },
+  "tools": [
+    {
+      "name": "linear_list_teams",
+      "description": "List Linear teams with ids and keys.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": { "query": "{ teams { nodes { id name key } } }" },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "linear_list_my_issues",
+      "description": "List issues assigned to the current user.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": {
+        "query": "query { viewer { assignedIssues(first: 30, orderBy: updatedAt) { nodes { identifier title priority url state { name } team { key } } } } }"
+      },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "linear_search_issues",
+      "description": "Search Linear issues by text.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": {
+        "query": "query($term: String!) { issueSearch(term: $term, first: 20) { nodes { identifier title state { name } url team { key } assignee { name } } } }",
+        "variables": { "term": "{query}" }
+      },
+      "args": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "linear_create_issue",
+      "description": "Create a Linear issue in a team.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": {
+        "query": "mutation($teamId: String!, $title: String!, $description: String) { issueCreate(input: { teamId: $teamId, title: $title, description: $description }) { success issue { identifier title url } } }",
+        "variables": { "teamId": "{team_id}", "title": "{title}", "description": "{description}" }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "team_id": { "type": "string", "description": "Team id (uuid) from linear_list_teams" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "description": "Markdown description (optional)" }
+        },
+        "required": ["team_id", "title"]
+      }
+    },
+    {
+      "name": "linear_update_issue",
+      "description": "Update an issue title or description by issue id.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": {
+        "query": "mutation($id: String!, $title: String, $description: String) { issueUpdate(id: $id, input: { title: $title, description: $description }) { success issue { identifier title url } } }",
+        "variables": { "id": "{issue_id}", "title": "{title}", "description": "{description}" }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "issue_id": { "type": "string", "description": "Issue id (uuid), not identifier" },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["issue_id"]
+      }
+    },
+    {
+      "name": "linear_add_comment",
+      "description": "Add a comment to a Linear issue.",
+      "method": "POST",
+      "url": "https://api.linear.app/graphql",
+      "body": {
+        "query": "mutation($issueId: String!, $body: String!) { commentCreate(input: { issueId: $issueId, body: $body }) { success comment { url } } }",
+        "variables": { "issueId": "{issue_id}", "body": "{body}" }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "issue_id": { "type": "string" },
+          "body": { "type": "string" }
+        },
+        "required": ["issue_id", "body"]
+      }
+    }
+  ]
+}

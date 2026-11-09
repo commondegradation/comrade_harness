@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comrade Harness</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ─────────────────────────── sidebar ─────────────────────────── -->
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <div class="brand">
+          <img id="app-logo" src="assets/logo-black.png" alt="">
+          <div class="brand-text">
+            <span class="brand-name">Comrade</span>
+            <span class="brand-badge">HARNESS</span>
+          </div>
+        </div>
+        <button class="icon-btn ghost" id="collapse-sidebar" title="Свернуть панель">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+      </div>
+
+      <button class="new-chat-btn" id="new-chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Новый чат</span>
+      </button>
+
+      <!-- workspace / folder picker -->
+      <div class="workspace-block" id="workspace-block">
+        <div class="section-label">
+          <span>Рабочая папка</span>
+          <button class="mini-link" id="workspace-reveal" title="Открыть в проводнике" hidden>открыть</button>
+        </div>
+        <div class="workspace-card" id="workspace-card" role="button" tabindex="0">
+          <div class="workspace-icon" id="workspace-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          <div class="workspace-meta">
+            <div class="workspace-name" id="workspace-name">Выбрать папку…</div>
+            <div class="workspace-path" id="workspace-path">агент будет работать здесь</div>
+          </div>
+          <svg class="workspace-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="workspace-chips" id="workspace-chips"></div>
+      </div>
+
+      <div class="history-block">
+        <div class="section-label"><span>Чаты</span><button class="mini-link" id="clear-history" title="Удалить все чаты">очистить</button></div>
+        <div class="chat-history" id="chat-history"></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>Чат</span>
+        </button>
+        <button class="nav-item" data-view="providers">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+          <span>Провайдеры</span>
+        </button>
+        <button class="nav-item" data-view="plugins">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7h-3V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v3H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z"></path></svg>
+          <span>Плагины</span>
+          <span class="nav-badge" id="plugins-badge" hidden></span>
+        </button>
+        <button class="nav-item" data-view="settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Настройки</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ─────────────────────────── main ─────────────────────────── -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="model-picker" id="model-picker">
+            <span class="model-dot"></span>
+            <span class="model-label" id="model-label">Модель не выбрана</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <span class="provider-hint" id="provider-hint"></span>
+        </div>
+        <div class="topbar-right">
+          <button class="pill" id="tools-pill" title="Инструменты, доступные модели">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            <span id="tools-count">—</span>
+          </button>
+          <button class="pill" id="browser-pill" title="Открыть окно браузера агента (для входа на сайты)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>Браузер</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- chat view -->
+      <section class="view active" id="view-chat">
+        <div class="messages-scroll" id="messages-scroll">
+          <div class="messages-inner" id="messages"></div>
+        </div>
+        <div class="composer-wrap">
+          <div class="composer" id="composer">
+            <div class="attachments" id="attachments"></div>
+            <div class="composer-row">
+              <button class="icon-btn" id="attach-btn" title="Прикрепить файлы">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              </button>
+              <textarea id="input" rows="1" placeholder="Сообщение Comrade…"></textarea>
+              <button class="send-btn" id="send" title="Отправить">
+                <svg class="icon-send" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                <svg class="icon-stop" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+              </button>
+            </div>
+            <div class="composer-foot">
+              <span id="composer-hint">Enter — отправить · Shift+Enter — перенос строки</span>
+              <span id="workspace-hint"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- providers view -->
+      <section class="view" id="view-providers">
+        <div class="page">
+          <div class="page-head">
+            <div>
+              <h1>Провайдеры</h1>
+              <p>Любой OpenAI-совместимый API. У одного провайдера может быть несколько моделей — переключай их в шапке чата.</p>
+            </div>
+            <button class="primary-btn" id="add-provider">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Добавить провайдера
+            </button>
+          </div>
+          <div class="provider-list" id="provider-list"></div>
+          <div class="hint-box" id="providers-empty" hidden>
+            Добавь провайдера: укажи URL вида <code>https://api.openai.com/v1/chat/completions</code>, ключ и список моделей.
+          </div>
+        </div>
+      </section>
+
+      <!-- plugins view -->
+      <section class="view" id="view-plugins">
+        <div class="page">
+          <div class="page-head">
+            <div>
+              <h1>Плагины</h1>
+              <p>Подключи свои сервисы — агент будет действовать от твоего имени. Или добавь MCP-сервер с любыми инструментами.</p>
+            </div>
+            <div class="segmented" id="plugins-tabs">
+              <button class="seg active" data-tab="services">Сервисы</button>
+              <button class="seg" data-tab="mcp">MCP</button>
+            </div>
+          </div>
+          <div id="tab-services">
+            <div class="connector-grid" id="connector-grid"></div>
+            <div class="hint-box">
+              Токены хранятся в зашифрованном виде (macOS Keychain / Windows DPAPI) и никогда не попадают в контекст модели.
+              Свои коннекторы можно добавить JSON-файлом в папку <code id="user-connectors-path">connectors</code>.
+            </div>
+          </div>
+          <div id="tab-mcp" hidden>
+            <div class="mcp-list" id="mcp-list"></div>
+            <div class="mcp-actions">
+              <button class="primary-btn" id="add-mcp">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Добавить MCP сервер
+              </button>
+              <button class="ghost-btn" id="reload-mcp">Обновить</button>
+            </div>
+            <div class="hint-box">
+              Поддерживаются stdio-серверы (<code>npx</code>, <code>uvx</code>, любые команды) и HTTP/SSE-серверы (JSON-RPC).
+              Инструменты MCP автоматически попадают в набор агента.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- settings view -->
+      <section class="view" id="view-settings">
+        <div class="page">
+          <div class="page-head">
+            <div>
+              <h1>Настройки</h1>
+              <p>Всё хранится локально. Наружу уходят только запросы к тем сервисам, которые ты подключил.</p>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h2>Внешний вид</h2>
+            <div class="field-row">
+              <label for="theme-select">Тема</label>
+              <select id="theme-select">
+                <option value="dark">Тёмная</option>
+                <option value="light">Светлая</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h2>Агент</h2>
+            <div class="field-row">
+              <label for="temp-range">Температура</label>
+              <div class="range-wrap">
+                <input type="range" id="temp-range" min="0" max="2" step="0.1" value="0.7">
+                <span class="range-value" id="temp-value">0.7</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <label for="tokens-input">Макс. токенов ответа</label>
+              <input type="number" id="tokens-input" min="256" max="200000" step="256" value="4096">
+            </div>
+            <div class="field-row">
+              <label for="steps-input">Максимум шагов с инструментами</label>
+              <input type="number" id="steps-input" min="1" max="60" step="1" value="24">
+            </div>
+            <div class="field-col">
+              <label for="system-prompt">Системный промпт</label>
+              <textarea id="system-prompt" rows="8"></textarea>
+              <div class="field-col-actions">
+                <button class="ghost-btn" id="reset-system-prompt">Вернуть стандартный</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h2>Браузер агента</h2>
+            <p class="muted">Отдельная сессия Chromium с сохранением cookie. Открой окно и войди в нужные сайты — агент будет ходить по ним уже авторизованным.</p>
+            <div class="row-actions">
+              <button class="ghost-btn" id="open-browser">Открыть окно браузера</button>
+              <button class="ghost-btn danger" id="clear-browser">Очистить данные сайтов</button>
+            </div>
+            <div class="muted small" id="browser-status">Браузер не открывался</div>
+          </div>
+
+          <div class="settings-section">
+            <h2>Данные</h2>
+            <div class="field-row"><label>Хранилище</label><code class="path" id="userdata-path">—</code></div>
+            <div class="field-row"><label>Шифрование секретов</label><span id="encryption-status">—</span></div>
+            <div class="field-row"><label>Версия</label><span id="app-version">—</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- toast host -->
+  <div class="toast-host" id="toast-host"></div>
+
+  <!-- ─────────────────────────── modals ─────────────────────────── -->
+  <div class="modal" id="modal-workspace" hidden>
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h2>Рабочая папка</h2>
+        <button class="icon-btn ghost" data-close="modal-workspace">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="muted">Агент будет читать и писать файлы здесь. Все относительные пути считаются от этой папки.</p>
+        <div class="path-input-row">
+          <div class="path-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <input type="text" id="workspace-input" placeholder="/Users/you/Projects/my-app или ~/Projects" spellcheck="false">
+          </div>
+          <button class="ghost-btn" id="workspace-browse">Обзор…</button>
+          <button class="primary-btn" id="workspace-apply">Выбрать</button>
+        </div>
+        <div class="path-error" id="workspace-error" hidden></div>
+
+        <div class="workspace-columns">
+          <div>
+            <div class="subhead">Недавние</div>
+            <div class="recent-list" id="workspace-recents"></div>
+          </div>
+          <div>
+            <div class="subhead">Быстрый доступ</div>
+            <div class="recent-list" id="workspace-suggestions"></div>
+          </div>
+        </div>
+        <div class="modal-foot between">
+          <button class="ghost-btn danger" id="workspace-clear">Сбросить выбор</button>
+          <span class="muted small">Перетащи папку в окно, чтобы выбрать её</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-provider" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="provider-modal-title">Новый провайдер</h2>
+        <button class="icon-btn ghost" data-close="modal-provider">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="preset-row" id="provider-presets"></div>
+        <div class="field-col">
+          <label for="provider-name">Название</label>
+          <input type="text" id="provider-name" placeholder="OpenAI" spellcheck="false">
+        </div>
+        <div class="field-col">
+          <label for="provider-url">API URL</label>
+          <input type="text" id="provider-url" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false">
+        </div>
+        <div class="field-col">
+          <label for="provider-key">API ключ</label>
+          <input type="password" id="provider-key" placeholder="sk-…" spellcheck="false">
+        </div>
+        <div class="field-col">
+          <div class="field-col-head">
+            <label for="provider-models">Модели (по одной в строке: <code>id</code> или <code>id = название</code>)</label>
+            <button class="mini-link" id="provider-load-models">Загрузить из API</button>
+          </div>
+          <textarea id="provider-models" rows="5" spellcheck="false" placeholder="gpt-4o-mini&#10;gpt-4o&#10;o3-mini"></textarea>
+          <div class="muted small" id="provider-models-status"></div>
+        </div>
+        <div class="field-col">
+          <label for="provider-headers">Доп. заголовки (JSON, необязательно)</label>
+          <input type="text" id="provider-headers" placeholder='{"HTTP-Referer": "https://…"}' spellcheck="false">
+        </div>
+        <div class="modal-foot">
+          <button class="ghost-btn" data-close="modal-provider">Отмена</button>
+          <button class="primary-btn" id="provider-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-connector" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-head-title">
+          <div class="connector-avatar big" id="connector-avatar">S</div>
+          <div>
+            <h2 id="connector-title">Сервис</h2>
+            <p class="muted small" id="connector-desc"></p>
+          </div>
+        </div>
+        <button class="icon-btn ghost" data-close="modal-connector">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="connector-settings"></div>
+        <div class="segmented" id="connector-modes"></div>
+        <div id="connector-oauth-fields" hidden>
+          <div class="field-col">
+            <label for="connector-client-id" id="connector-client-id-label">OAuth Client ID</label>
+            <input type="text" id="connector-client-id" spellcheck="false">
+          </div>
+          <div class="field-col">
+            <label for="connector-client-secret" id="connector-client-secret-label">OAuth Client Secret</label>
+            <input type="password" id="connector-client-secret" spellcheck="false">
+          </div>
+          <p class="muted small" id="connector-oauth-hint"></p>
+        </div>
+        <div id="connector-token-fields">
+          <div class="field-col" id="connector-username-row" hidden>
+            <label for="connector-username" id="connector-username-label">Email</label>
+            <input type="text" id="connector-username" spellcheck="false">
+          </div>
+          <div class="field-col">
+            <label for="connector-token" id="connector-token-label">Токен</label>
+            <input type="password" id="connector-token" spellcheck="false">
+          </div>
+          <p class="muted small" id="connector-token-hint"></p>
+        </div>
+        <div class="auth-progress" id="connector-progress" hidden></div>
+        <div class="modal-foot">
+          <a class="mini-link" id="connector-help" target="_blank" rel="noreferrer">Где взять доступ →</a>
+          <div class="row-actions">
+            <button class="ghost-btn" data-close="modal-connector">Отмена</button>
+            <button class="primary-btn" id="connector-submit">Подключить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-mcp" hidden>
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h2 id="mcp-modal-title">Новый MCP сервер</h2>
+        <button class="icon-btn ghost" data-close="modal-mcp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="mcp-presets-wrap">
+          <div class="subhead">Готовые серверы</div>
+          <div class="preset-grid" id="mcp-presets"></div>
+        </div>
+        <div class="field-row">
+          <label for="mcp-name">Название</label>
+          <input type="text" id="mcp-name" placeholder="Filesystem">
+        </div>
+        <div class="field-row">
+          <label for="mcp-transport">Транспорт</label>
+          <select id="mcp-transport">
+            <option value="stdio">stdio (локальный процесс)</option>
+            <option value="http">HTTP / SSE (JSON-RPC)</option>
+          </select>
+        </div>
+        <div id="mcp-stdio-fields">
+          <div class="field-row">
+            <label for="mcp-command">Команда</label>
+            <input type="text" id="mcp-command" placeholder="npx" spellcheck="false">
+          </div>
+          <div class="field-row">
+            <label for="mcp-args">Аргументы</label>
+            <input type="text" id="mcp-args" placeholder="-y @modelcontextprotocol/server-filesystem /path" spellcheck="false">
+          </div>
+          <div class="field-col">
+            <label for="mcp-env">Переменные окружения (KEY=value, по одной в строке)</label>
+            <textarea id="mcp-env" rows="3" spellcheck="false" placeholder="GITHUB_PERSONAL_ACCESS_TOKEN=ghp_…"></textarea>
+          </div>
+        </div>
+        <div id="mcp-http-fields" hidden>
+          <div class="field-row">
+            <label for="mcp-url">URL</label>
+            <input type="text" id="mcp-url" placeholder="https://example.com/mcp" spellcheck="false">
+          </div>
+          <div class="field-col">
+            <label for="mcp-headers">Заголовки (JSON)</label>
+            <input type="text" id="mcp-headers" placeholder='{"Authorization": "Bearer …"}' spellcheck="false">
+          </div>
+        </div>
+        <div class="modal-foot">
+          <div class="muted small" id="mcp-form-hint"></div>
+          <div class="row-actions">
+            <button class="ghost-btn" data-close="modal-mcp">Отмена</button>
+            <button class="primary-btn" id="mcp-save">Сохранить и запустить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-models" hidden>
+    <div class="modal-card narrow">
+      <div class="modal-head">
+        <h2>Модель</h2>
+        <button class="icon-btn ghost" data-close="modal-models">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="search-input" id="model-search" placeholder="Поиск модели…" spellcheck="false">
+        <div class="model-list" id="model-list"></div>
+        <div class="modal-foot between">
+          <button class="mini-link" id="model-manage">Управлять провайдерами</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/marked.umd.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

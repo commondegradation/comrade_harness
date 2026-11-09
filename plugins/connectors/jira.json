@@ -1,0 +1,157 @@
+{
+  "id": "jira",
+  "name": "Jira",
+  "category": "Задачи",
+  "icon": "jira",
+  "color": "#e6f0ff",
+  "description": "Проекты, задачи и комментарии Jira Cloud от имени пользователя.",
+  "docsUrl": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+  "settings": [
+    {
+      "key": "site",
+      "label": "Домен Atlassian",
+      "placeholder": "mycompany.atlassian.net",
+      "hint": "Только домен, без https://",
+      "required": true
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "usernameLabel": "Email аккаунта Atlassian",
+    "usernamePlaceholder": "you@company.com",
+    "tokenLabel": "API Token",
+    "tokenHint": "Создай API-токен на id.atlassian.com → Security → API tokens. Пара email + token работает как Basic Auth.",
+    "helpUrl": "https://id.atlassian.com/manage-profile/security/api-tokens",
+    "validate": { "method": "GET", "url": "https://{site}/rest/api/3/myself", "labelPath": "displayName" }
+  },
+  "headers": { "Accept": "application/json" },
+  "tools": [
+    {
+      "name": "jira_get_myself",
+      "description": "Get the current Jira user profile.",
+      "method": "GET",
+      "url": "https://{site}/rest/api/3/myself",
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "jira_list_projects",
+      "description": "List Jira projects (key and name).",
+      "method": "GET",
+      "url": "https://{site}/rest/api/3/project",
+      "query": { "maxResults": 100 },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "jira_search_issues",
+      "description": "Search issues with JQL, e.g. \"project = ABC AND status = 'In Progress' ORDER BY updated DESC\".",
+      "method": "GET",
+      "url": "https://{site}/rest/api/3/search",
+      "query": {
+        "jql": "{jql}",
+        "maxResults": 25,
+        "fields": "summary,status,assignee,priority,updated,issuetype,project"
+      },
+      "args": {
+        "type": "object",
+        "properties": { "jql": { "type": "string" } },
+        "required": ["jql"]
+      }
+    },
+    {
+      "name": "jira_get_issue",
+      "description": "Get a Jira issue with description and comments.",
+      "method": "GET",
+      "url": "https://{site}/rest/api/3/issue/{issue_key}",
+      "args": {
+        "type": "object",
+        "properties": { "issue_key": { "type": "string", "description": "e.g. ABC-123" } },
+        "required": ["issue_key"]
+      }
+    },
+    {
+      "name": "jira_create_issue",
+      "description": "Create a Jira issue. Description is plain text.",
+      "method": "POST",
+      "url": "https://{site}/rest/api/3/issue",
+      "body": {
+        "fields": {
+          "project": { "key": "{project_key}" },
+          "summary": "{summary}",
+          "issuetype": { "name": "{issue_type}" },
+          "description": {
+            "type": "doc",
+            "version": 1,
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [ { "type": "text", "text": "{description}" } ]
+              }
+            ]
+          }
+        }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "project_key": { "type": "string" },
+          "summary": { "type": "string" },
+          "description": { "type": "string" },
+          "issue_type": { "type": "string", "description": "Task, Bug, Story… (default: Task)" }
+        },
+        "required": ["project_key", "summary"]
+      }
+    },
+    {
+      "name": "jira_add_comment",
+      "description": "Add a plain-text comment to a Jira issue.",
+      "method": "POST",
+      "url": "https://{site}/rest/api/3/issue/{issue_key}/comment",
+      "body": {
+        "body": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [ { "type": "text", "text": "{comment}" } ]
+            }
+          ]
+        }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "issue_key": { "type": "string" },
+          "comment": { "type": "string" }
+        },
+        "required": ["issue_key", "comment"]
+      }
+    },
+    {
+      "name": "jira_transition_issue",
+      "description": "Move a Jira issue to another status (transition id from GET /transitions is required).",
+      "method": "POST",
+      "url": "https://{site}/rest/api/3/issue/{issue_key}/transitions",
+      "body": { "transition": { "id": "{transition_id}" } },
+      "args": {
+        "type": "object",
+        "properties": {
+          "issue_key": { "type": "string" },
+          "transition_id": { "type": "string" }
+        },
+        "required": ["issue_key", "transition_id"]
+      }
+    },
+    {
+      "name": "jira_get_transitions",
+      "description": "List available status transitions for an issue.",
+      "method": "GET",
+      "url": "https://{site}/rest/api/3/issue/{issue_key}/transitions",
+      "args": {
+        "type": "object",
+        "properties": { "issue_key": { "type": "string" } },
+        "required": ["issue_key"]
+      }
+    }
+  ]
+}

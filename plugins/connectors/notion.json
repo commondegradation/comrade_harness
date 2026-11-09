@@ -1,0 +1,158 @@
+{
+  "id": "notion",
+  "name": "Notion",
+  "category": "Знания",
+  "icon": "notion",
+  "color": "#ffffff",
+  "description": "Поиск по рабочему пространству, чтение и создание страниц, базы данных.",
+  "docsUrl": "https://developers.notion.com/reference/intro",
+  "auth": {
+    "type": "token",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "tokenLabel": "Internal Integration Token",
+    "tokenPlaceholder": "ntn_… или secret_…",
+    "tokenHint": "Создай внутреннюю интеграцию, дай ей доступ к нужным страницам и скопируй токен. Интеграции: notion.so/profile/integrations.",
+    "helpUrl": "https://www.notion.so/profile/integrations",
+    "validate": { "method": "GET", "url": "https://api.notion.com/v1/users/me", "labelPath": "name" }
+  },
+  "headers": {
+    "Notion-Version": "2022-06-28",
+    "Accept": "application/json"
+  },
+  "tools": [
+    {
+      "name": "notion_search",
+      "description": "Search pages and databases shared with the integration.",
+      "method": "POST",
+      "url": "https://api.notion.com/v1/search",
+      "body": {
+        "query": "{query}",
+        "page_size": 20,
+        "sort": { "direction": "descending", "timestamp": "last_edited_time" }
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Text to search; empty string returns everything" }
+        }
+      }
+    },
+    {
+      "name": "notion_get_page",
+      "description": "Get a Notion page object by id (properties, parent, url).",
+      "method": "GET",
+      "url": "https://api.notion.com/v1/pages/{page_id}",
+      "args": {
+        "type": "object",
+        "properties": { "page_id": { "type": "string" } },
+        "required": ["page_id"]
+      }
+    },
+    {
+      "name": "notion_get_block_children",
+      "description": "Read the content blocks of a page or block. Use it to read page text.",
+      "method": "GET",
+      "url": "https://api.notion.com/v1/blocks/{block_id}/children",
+      "query": { "page_size": 100 },
+      "args": {
+        "type": "object",
+        "properties": { "block_id": { "type": "string", "description": "Page id or block id" } },
+        "required": ["block_id"]
+      }
+    },
+    {
+      "name": "notion_create_page_in_page",
+      "description": "Create a subpage inside an existing page. Content is plain text, one paragraph per line.",
+      "method": "POST",
+      "url": "https://api.notion.com/v1/pages",
+      "body": {
+        "parent": { "page_id": "{parent_id}" },
+        "properties": { "title": { "title": [ { "type": "text", "text": { "content": "{title}" } } ] } },
+        "children": "{{json:children}}"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "parent_id": { "type": "string" },
+          "title": { "type": "string" },
+          "children": {
+            "type": "array",
+            "description": "Optional Notion block objects, e.g. [{\"object\":\"block\",\"type\":\"paragraph\",\"paragraph\":{\"rich_text\":[{\"type\":\"text\",\"text\":{\"content\":\"Hello\"}}]}}]"
+          }
+        },
+        "required": ["parent_id", "title"]
+      }
+    },
+    {
+      "name": "notion_create_page_in_database",
+      "description": "Create a page (row) in a Notion database. Properties must be valid Notion property values.",
+      "method": "POST",
+      "url": "https://api.notion.com/v1/pages",
+      "body": {
+        "parent": { "database_id": "{database_id}" },
+        "properties": "{{json:properties}}"
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "database_id": { "type": "string" },
+          "properties": {
+            "type": "object",
+            "description": "Notion properties object, e.g. {\"Name\":{\"title\":[{\"text\":{\"content\":\"Task\"}}]}}"
+          }
+        },
+        "required": ["database_id", "properties"]
+      }
+    },
+    {
+      "name": "notion_append_blocks",
+      "description": "Append content blocks to a page or block.",
+      "method": "PATCH",
+      "url": "https://api.notion.com/v1/blocks/{block_id}/children",
+      "body": { "children": "{{json:children}}" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "block_id": { "type": "string" },
+          "children": {
+            "type": "array",
+            "description": "Array of Notion block objects, e.g. [{\"object\":\"block\",\"type\":\"paragraph\",\"paragraph\":{\"rich_text\":[{\"type\":\"text\",\"text\":{\"content\":\"Text\"}}]}}]"
+          }
+        },
+        "required": ["block_id", "children"]
+      }
+    },
+    {
+      "name": "notion_query_database",
+      "description": "Query a Notion database with an optional filter and sorts.",
+      "method": "POST",
+      "url": "https://api.notion.com/v1/databases/{database_id}/query",
+      "body": {
+        "filter": "{{json:filter}}",
+        "sorts": "{{json:sorts}}",
+        "page_size": 50
+      },
+      "args": {
+        "type": "object",
+        "properties": {
+          "database_id": { "type": "string" },
+          "filter": { "type": "object", "description": "Notion filter object (optional)" },
+          "sorts": { "type": "array", "description": "Notion sorts array (optional)" }
+        },
+        "required": ["database_id"]
+      }
+    },
+    {
+      "name": "notion_get_database",
+      "description": "Get a database schema (property names and types).",
+      "method": "GET",
+      "url": "https://api.notion.com/v1/databases/{database_id}",
+      "args": {
+        "type": "object",
+        "properties": { "database_id": { "type": "string" } },
+        "required": ["database_id"]
+      }
+    }
+  ]
+}

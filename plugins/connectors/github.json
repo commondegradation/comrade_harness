@@ -1,0 +1,179 @@
+{
+  "id": "github",
+  "name": "GitHub",
+  "category": "Разработка",
+  "icon": "github",
+  "color": "#e6edf3",
+  "description": "Репозитории, код, issues, pull requests и уведомления от имени пользователя.",
+  "docsUrl": "https://docs.github.com/rest",
+  "auth": {
+    "type": "token",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "tokenLabel": "Personal Access Token",
+    "tokenPlaceholder": "ghp_… или github_pat_…",
+    "tokenHint": "Классический токен со scopes repo, read:user, notifications, workflow. Создать: Settings → Developer settings → Tokens.",
+    "helpUrl": "https://github.com/settings/tokens/new",
+    "validate": { "method": "GET", "url": "https://api.github.com/user", "labelPath": "login" },
+    "oauth": {
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token",
+      "scopes": ["repo", "read:user", "notifications", "workflow", "read:org"],
+      "needsClientSecret": true,
+      "pkce": false,
+      "clientIdLabel": "OAuth Client ID",
+      "clientSecretLabel": "OAuth Client Secret",
+      "clientHelpUrl": "https://github.com/settings/developers",
+      "extraAuthParams": {}
+    }
+  },
+  "headers": {
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  },
+  "tools": [
+    {
+      "name": "github_get_me",
+      "description": "Get the authenticated GitHub user profile.",
+      "method": "GET",
+      "url": "https://api.github.com/user",
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "github_list_repositories",
+      "description": "List repositories of the authenticated user (most recently updated first).",
+      "method": "GET",
+      "url": "https://api.github.com/user/repos",
+      "query": { "sort": "updated", "per_page": 30, "affiliation": "owner,collaborator,organization_member" },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "github_search_repositories",
+      "description": "Search GitHub repositories by query, e.g. 'language:typescript stars:>1000 agent'.",
+      "method": "GET",
+      "url": "https://api.github.com/search/repositories",
+      "query": { "q": "{query}", "per_page": 15 },
+      "args": {
+        "type": "object",
+        "properties": { "query": { "type": "string", "description": "GitHub search query" } },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "github_get_repository",
+      "description": "Get repository metadata (stars, description, default branch, open issues).",
+      "method": "GET",
+      "url": "https://api.github.com/repos/{owner}/{repo}",
+      "args": {
+        "type": "object",
+        "properties": { "owner": { "type": "string" }, "repo": { "type": "string" } },
+        "required": ["owner", "repo"]
+      }
+    },
+    {
+      "name": "github_list_issues",
+      "description": "List issues and pull requests in a repository.",
+      "method": "GET",
+      "url": "https://api.github.com/repos/{owner}/{repo}/issues",
+      "query": { "state": "{state}", "per_page": 30, "sort": "updated" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "repo": { "type": "string" },
+          "state": { "type": "string", "enum": ["open", "closed", "all"], "description": "Default: open" }
+        },
+        "required": ["owner", "repo"]
+      }
+    },
+    {
+      "name": "github_create_issue",
+      "description": "Create an issue in a repository.",
+      "method": "POST",
+      "url": "https://api.github.com/repos/{owner}/{repo}/issues",
+      "body": { "title": "{title}", "body": "{body}", "labels": "{{json:labels}}" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "repo": { "type": "string" },
+          "title": { "type": "string" },
+          "body": { "type": "string", "description": "Markdown body" },
+          "labels": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["owner", "repo", "title"]
+      }
+    },
+    {
+      "name": "github_comment_issue",
+      "description": "Add a comment to an issue or pull request.",
+      "method": "POST",
+      "url": "https://api.github.com/repos/{owner}/{repo}/issues/{number}/comments",
+      "body": { "body": "{body}" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "repo": { "type": "string" },
+          "number": { "type": "integer" },
+          "body": { "type": "string" }
+        },
+        "required": ["owner", "repo", "number", "body"]
+      }
+    },
+    {
+      "name": "github_list_pull_requests",
+      "description": "List pull requests in a repository.",
+      "method": "GET",
+      "url": "https://api.github.com/repos/{owner}/{repo}/pulls",
+      "query": { "state": "{state}", "per_page": 30, "sort": "updated" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "repo": { "type": "string" },
+          "state": { "type": "string", "enum": ["open", "closed", "all"] }
+        },
+        "required": ["owner", "repo"]
+      }
+    },
+    {
+      "name": "github_get_file",
+      "description": "Read a text file from a repository (raw content).",
+      "method": "GET",
+      "url": "https://api.github.com/repos/{owner}/{repo}/contents/{path}",
+      "headers": { "Accept": "application/vnd.github.raw" },
+      "query": { "ref": "{ref}" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "repo": { "type": "string" },
+          "path": { "type": "string", "description": "Path inside the repo, e.g. src/index.ts" },
+          "ref": { "type": "string", "description": "Branch, tag or commit (optional)" }
+        },
+        "required": ["owner", "repo", "path"]
+      }
+    },
+    {
+      "name": "github_search_code",
+      "description": "Search code on GitHub. Requires a token with code search permission.",
+      "method": "GET",
+      "url": "https://api.github.com/search/code",
+      "query": { "q": "{query}", "per_page": 15 },
+      "args": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "github_list_notifications",
+      "description": "List unread notifications of the authenticated user.",
+      "method": "GET",
+      "url": "https://api.github.com/notifications",
+      "query": { "all": "false", "per_page": 30 },
+      "args": { "type": "object", "properties": {} }
+    }
+  ]
+}

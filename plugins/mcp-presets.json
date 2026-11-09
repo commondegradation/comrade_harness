@@ -1,0 +1,107 @@
+{
+  "presets": [
+    {
+      "id": "demo",
+      "name": "Демо-сервер Comrade",
+      "description": "Встроенный MCP-сервер для проверки подключения: эхо, время, информация о системе, случайные числа. Работает без установки зависимостей.",
+      "transport": "stdio",
+      "builtin": true,
+      "command": "__electron_node__",
+      "args": ["__demo_server__"]
+    },
+    {
+      "id": "filesystem",
+      "name": "Filesystem",
+      "description": "Официальный MCP-сервер файловой системы: чтение, запись и поиск файлов в разрешённых папках.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "{workspace}"],
+      "requires": "Node.js 18+ (npx)"
+    },
+    {
+      "id": "fetch",
+      "name": "Fetch (web)",
+      "description": "MCP-сервер для загрузки веб-страниц и конвертации HTML в markdown.",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "requires": "Python + uv (uvx)"
+    },
+    {
+      "id": "github-mcp",
+      "name": "GitHub MCP",
+      "description": "Официальный GitHub MCP-сервер: репозитории, issues, PR, поиск кода.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "" },
+      "requires": "Node.js, GitHub PAT"
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "description": "Веб-поиск и локальный поиск через Brave Search API.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": { "BRAVE_API_KEY": "" },
+      "requires": "Node.js, Brave API key"
+    },
+    {
+      "id": "puppeteer",
+      "name": "Puppeteer",
+      "description": "Управление браузером: навигация, скриншоты, клики и ввод на страницах.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "requires": "Node.js"
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "description": "Долговременная память агента в виде графа сущностей и отношений.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "requires": "Node.js"
+    },
+    {
+      "id": "sequential-thinking",
+      "name": "Sequential Thinking",
+      "description": "Пошаговое решение сложных задач с ветвлением и пересмотром шагов.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "requires": "Node.js"
+    },
+    {
+      "id": "notion-mcp",
+      "name": "Notion MCP",
+      "description": "Официальный Notion MCP-сервер для работы со страницами и базами.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": { "NOTION_TOKEN": "" },
+      "requires": "Node.js, Notion integration token"
+    },
+    {
+      "id": "slack-mcp",
+      "name": "Slack MCP",
+      "description": "Slack MCP-сервер: каналы, сообщения, ответы в тредах.",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": { "SLACK_BOT_TOKEN": "", "SLACK_TEAM_ID": "" },
+      "requires": "Node.js, Slack токены"
+    },
+    {
+      "id": "sqlite-mcp",
+      "name": "SQLite",
+      "description": "Запросы и схема локальной базы SQLite.",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "{workspace}/data.db"],
+      "requires": "Python + uv (uvx)"
+    }
+  ]
+}

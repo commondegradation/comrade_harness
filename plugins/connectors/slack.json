@@ -1,0 +1,117 @@
+{
+  "id": "slack",
+  "name": "Slack",
+  "category": "Коммуникации",
+  "icon": "slack",
+  "color": "#e8f4ff",
+  "description": "Каналы, сообщения и поиск в рабочем пространстве от имени пользователя.",
+  "docsUrl": "https://api.slack.com/methods",
+  "auth": {
+    "type": "token",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "tokenLabel": "User OAuth Token",
+    "tokenPlaceholder": "xoxp-…",
+    "tokenHint": "Нужен User Token (xoxp-…), а не Bot Token. Создай app и запроси scopes: channels:read, chat:write, search:read, users:read, reactions:write.",
+    "helpUrl": "https://api.slack.com/apps",
+    "validate": { "method": "GET", "url": "https://slack.com/api/auth.test", "labelPath": "user" },
+    "oauth": {
+      "authorizationUrl": "https://slack.com/oauth/v2/authorize",
+      "tokenUrl": "https://slack.com/api/oauth.v2.access",
+      "scopes": ["channels:read", "chat:write", "search:read", "users:read", "reactions:write"],
+      "needsClientSecret": true,
+      "pkce": false,
+      "clientIdLabel": "Client ID",
+      "clientSecretLabel": "Client Secret",
+      "clientHelpUrl": "https://api.slack.com/apps",
+      "extraAuthParams": {}
+    }
+  },
+  "jsonOkField": "ok",
+  "jsonErrorField": "error",
+  "tools": [
+    {
+      "name": "slack_list_channels",
+      "description": "List public and private channels the user can see.",
+      "method": "GET",
+      "url": "https://slack.com/api/conversations.list",
+      "query": { "types": "public_channel,private_channel", "limit": 200, "exclude_archived": "true" },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "slack_list_users",
+      "description": "List users in the workspace.",
+      "method": "GET",
+      "url": "https://slack.com/api/users.list",
+      "query": { "limit": 200 },
+      "args": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "slack_post_message",
+      "description": "Send a message to a Slack channel (use channel id like C0ABCDEF, or name like #general).",
+      "method": "POST",
+      "url": "https://slack.com/api/chat.postMessage",
+      "body": { "channel": "{channel}", "text": "{text}", "mrkdwn": true, "unfurl_links": false },
+      "args": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "description": "Channel id or #name" },
+          "text": { "type": "string" }
+        },
+        "required": ["channel", "text"]
+      }
+    },
+    {
+      "name": "slack_search_messages",
+      "description": "Search messages and files across the workspace.",
+      "method": "GET",
+      "url": "https://slack.com/api/search.messages",
+      "query": { "query": "{query}", "count": 20, "sort": "timestamp", "sort_dir": "desc" },
+      "args": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "slack_channel_history",
+      "description": "Read recent messages from a channel.",
+      "method": "GET",
+      "url": "https://slack.com/api/conversations.history",
+      "query": { "channel": "{channel}", "limit": 30 },
+      "args": {
+        "type": "object",
+        "properties": { "channel": { "type": "string", "description": "Channel id" } },
+        "required": ["channel"]
+      }
+    },
+    {
+      "name": "slack_get_thread",
+      "description": "Read a message thread (replies).",
+      "method": "GET",
+      "url": "https://slack.com/api/conversations.replies",
+      "query": { "channel": "{channel}", "ts": "{ts}", "limit": 50 },
+      "args": {
+        "type": "object",
+        "properties": { "channel": { "type": "string" }, "ts": { "type": "string", "description": "Thread timestamp" } },
+        "required": ["channel", "ts"]
+      }
+    },
+    {
+      "name": "slack_add_reaction",
+      "description": "Add an emoji reaction to a message.",
+      "method": "POST",
+      "url": "https://slack.com/api/reactions.add",
+      "body": { "channel": "{channel}", "timestamp": "{timestamp}", "name": "{name}" },
+      "args": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string" },
+          "timestamp": { "type": "string", "description": "Message ts" },
+          "name": { "type": "string", "description": "Emoji name without colons, e.g. white_check_mark" }
+        },
+        "required": ["channel", "timestamp", "name"]
+      }
+    }
+  ]
+}
